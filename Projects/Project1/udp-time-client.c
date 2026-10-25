@@ -18,12 +18,14 @@ int main(int argc, char *argv[])
 {
 	int sockfd;
 	int addrlen;
-	char buffer[BUFFSIZE] = "GET TIME\r\n";
+    /* Project Requirement: Changed the message sent by the client */
+	char buffer[BUFFSIZE] = "Time Request from Justin Oliveros, Student ID: 816552\r\n";
 	struct sockaddr_in server;
 	struct sockaddr_in client;
 	char *servIP = argv[1];				// Server IP address from command line
 	int servPort = atoi(argv[2]);		// Server port number from command line
 	time_t current_time;
+    char server_response[BUFFSIZE];     // ADDED: Buffer to catch the text string returned by the server
 
 	/* Check that two arguments were passed on the command line */
     if (argc != 3) {
@@ -43,6 +45,8 @@ int main(int argc, char *argv[])
 	client.sin_port = htons(servPort);
 	client.sin_addr.s_addr = inet_addr(servIP); 
 	
+    /* Project Requirement: Added status print statement */
+    printf("Creating UDP socket...\n");
 	/* Create a UDP socket; returns -1 on failure */
 	sockfd = socket(AF_INET,SOCK_DGRAM,0);
 	if (sockfd == -1) {
@@ -56,12 +60,18 @@ int main(int argc, char *argv[])
 	/* Send time request to server */
 	addrlen = sizeof(struct sockaddr_in);
 	sendto(sockfd, buffer, (int)strlen(buffer) + 1, 0, (struct sockaddr *)&server, addrlen);
-	printf("Request sent to server\n");
+    
+    /* Project Requirement: Added print statements */
+	printf("Request sent to server. Payload: %s\n", buffer);
+    printf("Waiting for server response...\n");
+    
 	/* Receive time request from server */
-	recvfrom(sockfd, (char *) &current_time, (int) sizeof(current_time), 0, (struct sockaddr *)&server, (socklen_t *)&addrlen);
+    /* Modified: We now receive text into server_response instead of binary data into current_time */
+	recvfrom(sockfd, server_response, BUFFSIZE, 0, (struct sockaddr *)&server, (socklen_t *)&addrlen);
 		
+    printf("Response received from server.\n");
 	/* Print the time received from the server */
-	printf("\n The time received from the server:%s\n", ctime(&current_time));
+	printf("\nServer Reply:\n%s\n", server_response);
 
 	exit(0);
 	
