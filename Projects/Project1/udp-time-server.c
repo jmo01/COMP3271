@@ -21,20 +21,19 @@ int main()
 	int sockfd;
 	int addrlen;
 	char buffer[BUFFSIZE];
-    char response[BUFFSIZE * 2]; /* ADDED: Buffer to hold the combined echo and time */
+    char response[BUFFSIZE * 2]; /* added buffer */
 	struct sockaddr_in server;
 	struct sockaddr_in client;
 	time_t current_time;
 
-    /* Project Requirement: Added status print statement */
-    printf("Initializing server data structures...\n");
+    /* starting extra print statement */
+    printf("Initializing server data structures\n");
 	/* Populate socket data structures with IP address and port number */
 	memset((char *) &server, 0, sizeof(struct sockaddr_in));
 	server.sin_family = AF_INET;
 	server.sin_port = htons(PORT);
-    server.sin_addr.s_addr = INADDR_ANY;
+    //server.sin_addr.s_addr = INADDR_ANY;
 
-    printf("Creating UDP socket...\n");
 	/* Create a UDP socket; returns -1 on failure */
 	sockfd = socket(AF_INET,SOCK_DGRAM,0);
 	if (sockfd == -1) {
@@ -42,6 +41,7 @@ int main()
 		exit(1); /* Exit on error */
 	}
 
+	/* one more extra print statement */
     printf("Binding socket to port %d...\n", PORT);
 	/* Bind the socket address */
 	if ((bind(sockfd,(struct sockaddr*)&server,sizeof(struct sockaddr_in))) == -1) {
@@ -58,21 +58,18 @@ int main()
 		addrlen = sizeof(struct sockaddr_in);
 		recvfrom(sockfd, buffer,BUFFSIZE, 0,(struct sockaddr *)&client, (socklen_t *)&addrlen);
 		
-        /* Project Requirement: Added logging print statements */
-        printf("--------------------------------------------------\n");
         printf("Client request received!\n");
         printf("Client Payload: %s\n", buffer); 
         
 		current_time = time(NULL);
         
-        /* Project Requirement: Ensure server echoes name and student number alongside time */
+		/* extra print statements and the final message*/
 		snprintf(response, sizeof(response), "Echo: %s Current Time: %s", buffer, ctime(&current_time));
-        
         printf("Sending echo and timestamp back to client...\n");
+
 		sendto(sockfd, response, strlen(response) + 1, 0, (struct sockaddr *)&client, addrlen);
-        
+
         printf("Response sent successfully. Waiting for next request...\n");
-        printf("--------------------------------------------------\n\n");
 	}
 	exit(0);
 
